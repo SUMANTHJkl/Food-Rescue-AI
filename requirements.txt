@@ -1,0 +1,27 @@
+# Backend
+fastapi>=0.115.6
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.4
+pydantic-settings>=2.7.1
+sqlalchemy>=2.0.36
+psycopg2-binary>=2.9.10
+alembic>=1.14.0
+redis>=5.2.1
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.20
+httpx>=0.28.1
+
+# Data & ML
+pandas>=2.2.3
+numpy>=2.2.1
+scikit-learn>=1.6.0
+joblib>=1.4.2
+geopy>=2.4.1
+# prophet==1.1.6   # optional: heavier time-series forecasting (use conda on Windows)
+
+# Observability
+prometheus-client>=0.21.1
+
+# Tests
+pytest>=8.3.4

@@ -1,0 +1,9 @@
+﻿:root { --green:#1b7f4d; --orange:#e8631a; --bg:#f7faf7; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: Inter, system-ui, sans-serif; background:var(--bg); color:#14231a; }
+.app-header { display:flex; justify-content:space-between; align-items:center; padding:12px 24px; background:#fff; border-bottom:1px solid #e2e8e2; }
+.app-header h1 { font-size:18px; color:var(--green); margin:0; }
+.app-header nav a { margin-left:16px; text-decoration:none; color:#14231a; font-weight:500; }
+.app-header nav a:hover { color:var(--orange); }
+main { padding:24px; }
+.card { background:#fff; border:1px solid #e2e8e2; border-radius:12px; padding:16px; }
