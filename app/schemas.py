@@ -81,6 +81,7 @@ class SurplusCreate(BaseModel):
     food_item: str = "Mixed Meals"
     description: Optional[str] = None
     perishable_category: str = "cooked_meals"
+    plates_count: Optional[int] = 100
     quantity: float
     unit: str = "kg"
     prep_time: Optional[datetime] = None
@@ -96,6 +97,39 @@ class SurplusOut(SurplusCreate):
     predicted_demand: float = 0.0
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# --- Farmer & Bio-Waste Schemas ---
+class FarmerCreate(BaseModel):
+    name: str
+    farm_type: str = "composting"  # cattle_feed | composting | manure | sanctuary
+    contact: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    capacity_kg: float = 500.0
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
+
+class FarmerOut(FarmerCreate):
+    id: int
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BioWasteClaimCreate(BaseModel):
+    surplus_batch_id: int
+    farmer_id: int
+    claimed_kg: float
+    purpose: str = "compost_manure"  # animal_feed | compost_manure | biogas
+
+
+class BioWasteClaimOut(BioWasteClaimCreate):
+    id: int
+    status: str
+    claimed_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 # --- NGO Partner Schemas ---

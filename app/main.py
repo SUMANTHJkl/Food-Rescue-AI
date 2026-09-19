@@ -7,8 +7,10 @@ from app import models
 from app.config import settings
 from app.database import Base, engine
 from app.routers import (
+    ai,
     analytics,
     auth,
+    farmers,
     inventory,
     kitchens,
     matches,
@@ -42,8 +44,10 @@ app.add_middleware(
 )
 
 for module in (
+    ai,
     analytics,
     auth,
+    farmers,
     inventory,
     kitchens,
     matches,

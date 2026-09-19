@@ -160,3 +160,31 @@ class WasteLog(Base):
     reason = Column(String(255), default="expired")  # expired | spoiled | unconsumed_surplus
     date = Column(DateTime, default=datetime.utcnow)
 
+
+class FarmerPartner(Base):
+    __tablename__ = "farmer_partners"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    farm_type = Column(String(100), default="composting")  # cattle_feed | composting | manure | sanctuary
+    contact = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+    address = Column(Text, nullable=True)
+    capacity_kg = Column(Float, default=500.0)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class BioWasteClaim(Base):
+    __tablename__ = "biowaste_claims"
+
+    id = Column(Integer, primary_key=True, index=True)
+    surplus_batch_id = Column(Integer, ForeignKey("surplus_batches.id"), nullable=False)
+    farmer_id = Column(Integer, ForeignKey("farmer_partners.id"), nullable=False)
+    claimed_kg = Column(Float, nullable=False)
+    purpose = Column(String(100), default="compost_manure")  # animal_feed | compost_manure | biogas
+    status = Column(String(50), default="claimed")  # claimed | picked_up | processed
+    claimed_at = Column(DateTime, default=datetime.utcnow)
+
+

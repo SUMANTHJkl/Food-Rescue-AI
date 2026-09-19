@@ -22,30 +22,39 @@ def create_surplus(payload: schemas.SurplusCreate, db: Session = Depends(get_db)
     # Auto compute safety risk score
     safety = compute_safety_score(payload.perishable_category, hours_since_prep, payload.storage_temp)
 
+    # Estimate weight from plates count if plates provided
+    qty = payload.quantity
+    plates = payload.plates_count or 100
+    if (qty is None or qty == 0) and plates > 0:
+        qty = round(plates * 0.35, 1)
+
+    is_discard = (safety["safety_classification"] == "DISCARD")
+    batch_status = "biowaste_available" if is_discard else "classified"
+
     batch = models.SurplusBatch(
         kitchen_id=payload.kitchen_id,
         food_item=payload.food_item,
         description=payload.description,
         perishable_category=payload.perishable_category,
-        quantity=payload.quantity,
+        quantity=qty,
         unit=payload.unit,
         prep_time=prep_time,
         expiry_time=payload.expiry_time,
         storage_temp=payload.storage_temp,
         risk_score=safety["risk_score"],
         safety_class=safety["safety_classification"],
-        status="classified" if safety["safety_classification"] != "DISCARD" else "discarded"
+        status=batch_status
     )
     db.add(batch)
     db.commit()
     db.refresh(batch)
 
-    # Trigger alert if safety class is DISCARD or PRIORITY_DONATE
-    if safety["safety_classification"] == "DISCARD":
+    # Trigger alert
+    if is_discard:
         alert = models.Alert(
             kitchen_id=payload.kitchen_id,
-            severity="critical",
-            message=f"Surplus Batch #{batch.id} ({payload.food_item}, {payload.quantity}kg) flagged DISCARD - unsafe for donation."
+            severity="warning",
+            message=f"Surplus Batch #{batch.id} ({payload.food_item}, ~{plates} plates / {qty}kg) flagged DISCARD for human consumption. Rationally diverted to Bio-Cycle Farmers / Animal Feed."
         )
         db.add(alert)
         db.commit()
@@ -53,7 +62,7 @@ def create_surplus(payload: schemas.SurplusCreate, db: Session = Depends(get_db)
         alert = models.Alert(
             kitchen_id=payload.kitchen_id,
             severity="warning",
-            message=f"Surplus Batch #{batch.id} ({payload.food_item}, {payload.quantity}kg) PRIORITY_DONATE - urgent dispatch required."
+            message=f"Surplus Batch #{batch.id} ({payload.food_item}, {qty}kg) PRIORITY_DONATE - urgent dispatch required."
         )
         db.add(alert)
         db.commit()
