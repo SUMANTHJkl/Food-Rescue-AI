@@ -32,6 +32,10 @@ app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     description="SIH 2026 | PS-26234 | Team Caffeine Coders — AI Food Rescue Engine",
+    servers=[
+        {"url": "http://localhost:8000", "description": "Local FastAPI Backend Server"},
+        {"url": "http://127.0.0.1:8000", "description": "Loopback Server"}
+    ],
     lifespan=lifespan,
 )
 
@@ -67,5 +71,3 @@ def root():
 @app.get("/healthz", tags=["health"])
 def healthz():
     return {"status": "ok", "service": "food-rescue-ai", "version": "1.0.0"}
-
-

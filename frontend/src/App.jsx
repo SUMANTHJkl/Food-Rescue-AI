@@ -1,82 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import KitchenPortal from './pages/KitchenPortal';
 import NGOPortal from './pages/NGOPortal';
 import FarmerPortal from './pages/FarmerPortal';
 import AdminDashboard from './pages/AdminDashboard';
+import QRScannerModal from './components/QRScannerModal';
 
 export default function App() {
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
   return (
     <BrowserRouter>
       <div className="app-shell min-h-screen flex flex-col justify-between">
         {/* Navigation Header */}
-        <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-slate-800 px-4 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between wrap-gap">
-            {/* Logo Brand */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <span className="text-2xl p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg group-hover:scale-105 transition-transform">
+        <header className="app-header">
+          <div className="brand-logo">
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '24px', background: 'rgba(56, 189, 248, 0.15)', padding: '6px', borderRadius: '10px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
                 🌱
               </span>
               <div>
-                <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                  Food Rescue AI
-                </span>
-                <span className="text-[10px] text-muted block -mt-1 font-mono">
-                  SIH 2026 • PS-26234
-                </span>
+                <h1>Food Rescue AI</h1>
+                <span className="badge-pill">SIH 2026 • PS-26234</span>
               </div>
             </Link>
+          </div>
 
-            {/* Navigation Links */}
-            <nav className="flex items-center gap-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
-              <NavLink 
-                to="/" 
-                end 
-                className={({ isActive }) => `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${isActive ? 'bg-emerald-500 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}
-              >
-                🏠 Home
-              </NavLink>
-              
-              <NavLink 
-                to="/kitchen" 
-                className={({ isActive }) => `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${isActive ? 'bg-emerald-500 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}
-              >
-                🍳 Kitchen / Donor
-              </NavLink>
+          {/* Navigation Links */}
+          <nav className="app-nav">
+            <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              🏠 Home
+            </NavLink>
 
-              <NavLink 
-                to="/ngo" 
-                className={({ isActive }) => `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${isActive ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}
-              >
-                🏢 NGO Relief Hub
-              </NavLink>
+            <NavLink to="/kitchen" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              🍳 Kitchen / Donor
+            </NavLink>
 
-              <NavLink 
-                to="/farmer" 
-                className={({ isActive }) => `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${isActive ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}
-              >
-                🌾 Farmer Bio-Hub
-              </NavLink>
+            <NavLink to="/ngo" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              🏢 NGO Relief Hub
+            </NavLink>
 
-              <NavLink 
-                to="/admin" 
-                className={({ isActive }) => `px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${isActive ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-700/50'}`}
-              >
-                ⚡ Admin Command
-              </NavLink>
-            </nav>
+            <NavLink to="/farmer" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              🌾 Farmer Bio-Hub
+            </NavLink>
 
-            {/* Live Telemetry Pill */}
-            <div className="hidden md:flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-500/30">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              InsForge BaaS Active
+            <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              ⚡ Admin Command
+            </NavLink>
+          </nav>
+
+          {/* Header Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              className="btn btn-sm btn-primary"
+              onClick={() => setIsScannerOpen(true)}
+            >
+              📷 QR Scanner
+            </button>
+
+            <div className="badge-pill" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+              🟢 InsForge Active
             </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="max-w-7xl mx-auto w-full px-4 py-6 flex-1">
+        {/* Main Viewport */}
+        <main>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/kitchen" element={<KitchenPortal />} />
@@ -86,19 +76,28 @@ export default function App() {
           </Routes>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-slate-800 bg-slate-950/80 py-4 px-4 text-center text-xs text-muted">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+        {/* Global Footer */}
+        <footer style={{ borderTop: '1px solid var(--icy-border)', background: 'rgba(7, 17, 30, 0.95)', padding: '16px 24px', textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
+          <div style={{ maxWidth: '1320px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <p>© 2026 Food Rescue AI • Smart India Hackathon PS-26234 Solutions</p>
-            <div className="flex gap-4">
-              <span>InsForge Postgres</span>
+            <div style={{ display: 'flex', gap: '12px', fontWeight: '600' }}>
+              <span>💧 Icy Blue Fresh Theme</span>
               <span>•</span>
-              <span>OpenRouter AI (gpt-4o-mini)</span>
+              <span>🛡️ Safest Route Mapping</span>
               <span>•</span>
-              <span>MongoDB Audit Logger</span>
+              <span>📷 Unique QR Pass Tokens</span>
             </div>
           </div>
         </footer>
+
+        {/* Global QR Scanner Modal */}
+        <QRScannerModal 
+          isOpen={isScannerOpen} 
+          onClose={() => setIsScannerOpen(false)} 
+          onScanSuccess={(res) => {
+            alert(`Verified QR Order #${res.batchId} (${res.itemName})! Donor: ${res.donorName}`);
+          }}
+        />
       </div>
     </BrowserRouter>
   );
