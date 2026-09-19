@@ -1,6 +1,6 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app import models
 from app.config import settings
@@ -54,7 +54,13 @@ for module in (
     app.include_router(module.router, prefix=settings.api_v1_prefix)
 
 
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs")
+
+
 @app.get("/healthz", tags=["health"])
 def healthz():
     return {"status": "ok", "service": "food-rescue-ai", "version": "1.0.0"}
+
 
