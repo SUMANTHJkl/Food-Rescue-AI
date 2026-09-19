@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import RouteMap from '../components/RouteMap';
 import AICopilot from '../components/AICopilot';
 import QRCodeModal from '../components/QRCodeModal';
@@ -6,6 +7,9 @@ import QRScannerModal from '../components/QRScannerModal';
 import { getSurplus, claimSurplus } from '../api/client';
 
 export default function NGOPortal() {
+  const [searchParams] = useSearchParams();
+  const highlightBatchId = searchParams.get('batch_id');
+
   const [surplusList, setSurplusList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoute, setSelectedRoute] = useState(null);
@@ -80,17 +84,30 @@ export default function NGOPortal() {
 
   useEffect(() => {
     fetchSurplus();
-  }, []);
+  }, [highlightBatchId]);
 
   const fetchSurplus = async () => {
     setLoading(true);
     try {
       const data = await getSurplus();
-      if (Array.isArray(data) && data.length > 0) {
-        const consumable = data.filter(item => item.safety_class === 'CONSUMABLE' || item.safety_class === 'REROUTE_URGENT' || item.status === 'AVAILABLE');
-        setSurplusList(consumable.length > 0 ? consumable : mockSurplus);
-      } else {
-        setSurplusList(mockSurplus);
+      const list = (Array.isArray(data) && data.length > 0) ? data : mockSurplus;
+      setSurplusList(list);
+
+      // If URL has ?batch_id=..., select its route automatically
+      if (highlightBatchId) {
+        const target = list.find(b => String(b.id) === String(highlightBatchId));
+        if (target) {
+          setSelectedRoute({
+            fromName: target.donor_name || 'Donor Kitchen',
+            toName: ngoLocation.name,
+            distanceKm: target.distance_km || 3.4,
+            durationMins: 14,
+            fromLat: target.donor_lat || 12.9750,
+            fromLng: target.donor_lng || 77.6090,
+            toLat: ngoLocation.lat,
+            toLng: ngoLocation.lng
+          });
+        }
       }
     } catch (err) {
       setSurplusList(mockSurplus);
@@ -104,7 +121,7 @@ export default function NGOPortal() {
       setClaimedItems(prev => ({ ...prev, [item.id]: 'CLAIMING' }));
       await claimSurplus(item.id, { ngo_id: 1, recipient_name: ngoLocation.name });
       setClaimedItems(prev => ({ ...prev, [item.id]: 'CLAIMED' }));
-      showNotice(`Successfully claimed ${item.item_name}! Dispatch fleet initiated.`);
+      showNotice(`Successfully claimed ${item.item_name || item.food_item}! Dispatch fleet initiated.`);
       
       setSelectedRoute({
         fromName: item.donor_name || 'Donor Kitchen',
@@ -118,7 +135,7 @@ export default function NGOPortal() {
       });
     } catch (err) {
       setClaimedItems(prev => ({ ...prev, [item.id]: 'CLAIMED' }));
-      showNotice(`Claim registered for ${item.item_name}! Fleet dispatched.`);
+      showNotice(`Claim registered for ${item.item_name || item.food_item}! Fleet dispatched.`);
       setSelectedRoute({
         fromName: item.donor_name || 'Donor Kitchen',
         toName: ngoLocation.name,
@@ -145,9 +162,9 @@ export default function NGOPortal() {
   });
 
   return (
-    <div className="ngo-portal-container fade-in">
+    <div className="ngo-portal-container fade-in" style={{ maxWidth: '1380px', margin: '0 auto' }}>
       {/* Top Header */}
-      <div className="card margin-bottom-lg flex justify-between items-center wrap-gap" style={{ borderLeft: '4px solid #34d399' }}>
+      <div className="card margin-bottom-lg flex justify-between items-center wrap-gap" style={{ borderLeft: '6px solid #34d399', padding: '28px' }}>
         <div>
           <div className="flex items-center gap-xs">
             <span className="badge-pill" style={{ background: 'rgba(52, 211, 153, 0.2)', color: '#34d399' }}>
@@ -177,7 +194,7 @@ export default function NGOPortal() {
         </div>
       )}
 
-      {/* Main Grid Layout: Left Surplus Cards & Table, Right Safest Route Visualizer & AI */}
+      {/* Main Grid Layout */}
       <div className="grid grid-2 gap-lg align-start">
         {/* Left Column */}
         <div className="flex-col gap-md">
@@ -235,13 +252,17 @@ export default function NGOPortal() {
                   const status = claimedItems[item.id] || item.status;
                   const isClaimed = status === 'CLAIMED';
                   const isClaiming = status === 'CLAIMING';
-                  const isWaterOrBeverage = (item.food_type === 'BEVERAGE' || (item.item_name || '').toLowerCase().includes('water') || (item.item_name || '').toLowerCase().includes('juice'));
+                  const isWaterOrBeverage = (item.food_type === 'BEVERAGE' || (item.item_name || item.food_item || '').toLowerCase().includes('water') || (item.item_name || item.food_item || '').toLowerCase().includes('juice'));
+                  const isHighlighted = highlightBatchId && String(item.id) === String(highlightBatchId);
 
                   return (
                     <div 
                       key={item.id} 
                       className={`card ${isWaterOrBeverage ? 'food-card-beverage' : 'food-card-cooked'}`}
-                      style={{ background: isClaimed ? 'rgba(16, 185, 129, 0.08)' : 'rgba(13, 27, 46, 0.7)' }}
+                      style={{ 
+                        background: isClaimed ? 'rgba(16, 185, 129, 0.08)' : isHighlighted ? 'rgba(56, 189, 248, 0.15)' : 'rgba(13, 27, 46, 0.75)',
+                        borderColor: isHighlighted ? '#38bdf8' : 'var(--icy-border)'
+                      }}
                     >
                       <div className="flex justify-between items-start wrap-gap">
                         <div>
@@ -265,9 +286,9 @@ export default function NGOPortal() {
 
                         <div className="text-right">
                           <span className="text-xl font-extrabold text-amber-400 block">
-                            ~{item.plates_count || Math.round(item.quantity_kg * 4)} Portion Plates
+                            ~{item.plates_count || Math.round((item.quantity_kg || 25) * 4)} Portion Plates
                           </span>
-                          <span className="text-xs text-muted block">({item.quantity_kg || 25} kg)</span>
+                          <span className="text-xs text-muted block">({item.quantity_kg || item.quantity || 25} kg)</span>
                           <span className="badge-pill margin-top-xs" style={{ borderColor: '#f59e0b', color: '#fbbf24' }}>
                             ⌛ Safe for {item.expiry_hours || 4} hrs
                           </span>
@@ -297,7 +318,7 @@ export default function NGOPortal() {
                             className="btn btn-xs btn-outline"
                             onClick={() => setSelectedQRItem(item)}
                           >
-                            🔍 QR Pass Token
+                            🔍 Python QR Pass
                           </button>
                         </div>
 

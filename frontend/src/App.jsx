@@ -5,6 +5,7 @@ import KitchenPortal from './pages/KitchenPortal';
 import NGOPortal from './pages/NGOPortal';
 import FarmerPortal from './pages/FarmerPortal';
 import AdminDashboard from './pages/AdminDashboard';
+import VerifyPage from './pages/VerifyPage';
 import QRScannerModal from './components/QRScannerModal';
 
 export default function App() {
@@ -73,19 +74,20 @@ export default function App() {
             <Route path="/ngo" element={<NGOPortal />} />
             <Route path="/farmer" element={<FarmerPortal />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/verify" element={<VerifyPage />} />
           </Routes>
         </main>
 
         {/* Global Footer */}
-        <footer style={{ borderTop: '1px solid var(--icy-border)', background: 'rgba(7, 17, 30, 0.95)', padding: '16px 24px', textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
-          <div style={{ maxWidth: '1320px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <footer style={{ borderTop: '1px solid var(--icy-border)', background: 'rgba(7, 17, 30, 0.95)', padding: '18px 24px', textAlign: 'center', fontSize: '13px', color: 'var(--text-muted)' }}>
+          <div style={{ maxWidth: '1380px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <p>© 2026 Food Rescue AI • Smart India Hackathon PS-26234 Solutions</p>
-            <div style={{ display: 'flex', gap: '12px', fontWeight: '600' }}>
-              <span>💧 Icy Blue Fresh Theme</span>
+            <div style={{ display: 'flex', gap: '16px', fontWeight: '600' }}>
+              <span>💧 Icy Blue Theme</span>
               <span>•</span>
-              <span>🛡️ Safest Route Mapping</span>
+              <span>🛡️ Safest Route Engine</span>
               <span>•</span>
-              <span>📷 Unique QR Pass Tokens</span>
+              <span>📷 Deep-Link QR Verification</span>
             </div>
           </div>
         </footer>
@@ -95,7 +97,7 @@ export default function App() {
           isOpen={isScannerOpen} 
           onClose={() => setIsScannerOpen(false)} 
           onScanSuccess={(res) => {
-            alert(`Verified QR Order #${res.batchId} (${res.itemName})! Donor: ${res.donorName}`);
+            window.location.href = `/verify?token=${res.token}&batch_id=${res.batchId}`;
           }}
         />
       </div>

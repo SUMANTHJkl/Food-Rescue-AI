@@ -9,7 +9,7 @@ from qrcode.image.svg import SvgImage
 class PythonQRGenerator:
     """
     Python QR Code Generator service for Food Rescue AI.
-    Generates authentic, cryptographic QR code images using Python's qrcode library.
+    Generates authentic, cryptographic QR code images with deep-link URL capabilities.
     """
 
     @staticmethod
@@ -18,9 +18,11 @@ class PythonQRGenerator:
         raw_signature = f"{batch_id}:{item_name}:{timestamp}:FOOD_RESCUE_SECRET_KEY"
         token_hash = hashlib.sha256(raw_signature.encode('utf-8')).hexdigest()[:8].upper()
         unique_token = f"QR-FR-{batch_id}-{token_hash}"
+        direct_verify_url = f"http://localhost:5173/verify?token={unique_token}&batch_id={batch_id}"
 
         payload = {
             "token": unique_token,
+            "verify_url": direct_verify_url,
             "batch_id": batch_id,
             "item_name": item_name,
             "donor_name": donor_name,
@@ -35,7 +37,8 @@ class PythonQRGenerator:
     @classmethod
     def generate_qr_svg_str(cls, batch_id: int, item_name: str, **kwargs) -> str:
         payload = cls.generate_batch_qr_payload(batch_id, item_name, **kwargs)
-        payload_json = json.dumps(payload)
+        # Encode the direct deep-link URL in the QR matrix
+        qr_text = payload["verify_url"]
 
         qr = qrcode.QRCode(
             version=1,
@@ -44,7 +47,7 @@ class PythonQRGenerator:
             border=2,
             image_factory=SvgImage
         )
-        qr.add_data(payload_json)
+        qr.add_data(qr_text)
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="#000000", back_color="#FFFFFF")
@@ -56,7 +59,8 @@ class PythonQRGenerator:
     @classmethod
     def generate_qr_base64_png(cls, batch_id: int, item_name: str, **kwargs) -> tuple[str, dict]:
         payload = cls.generate_batch_qr_payload(batch_id, item_name, **kwargs)
-        payload_json = json.dumps(payload)
+        # Encode the direct deep-link URL in the QR matrix
+        qr_text = payload["verify_url"]
 
         qr = qrcode.QRCode(
             version=1,
@@ -64,7 +68,7 @@ class PythonQRGenerator:
             box_size=10,
             border=2
         )
-        qr.add_data(payload_json)
+        qr.add_data(qr_text)
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="#091526", back_color="#FFFFFF")
