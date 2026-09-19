@@ -44,3 +44,16 @@ def test_analytics_summary_api(client):
     summary = resp.json()
     assert "total_meals_rescued" in summary
     assert "total_co2_prevented_kg" in summary
+
+
+def test_python_qr_code_api(client):
+    resp = client.get("/api/v1/qr/generate/101?item_name=Paneer%20Butter%20Masala")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert "data:image/png;base64," in data["qr_image_data_url"]
+    assert data["payload"]["batch_id"] == 101
+
+    verify_resp = client.post("/api/v1/qr/verify", json={"token": data["payload"]["token"]})
+    assert verify_resp.status_code == 200
+    assert verify_resp.json()["verified"] is True

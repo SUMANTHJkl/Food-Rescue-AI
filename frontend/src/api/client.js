@@ -100,3 +100,23 @@ export const claimBioWaste = async (claimData) => {
     throw err;
   }
 };
+
+export const generatePythonQR = async (batchId, itemName = "Surplus Dish") => {
+  try {
+    const res = await api.get(`/qr/generate/${batchId}`, { params: { item_name: itemName } });
+    return res.data;
+  } catch (err) {
+    console.warn(`API GET /qr/generate/${batchId} failed:`, err.message);
+    throw err;
+  }
+};
+
+export const verifyQRToken = async (token) => {
+  try {
+    const res = await api.post("/qr/verify", { token });
+    return res.data;
+  } catch (err) {
+    console.warn("API POST /qr/verify failed:", err.message);
+    throw err;
+  }
+};

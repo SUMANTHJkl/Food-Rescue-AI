@@ -16,6 +16,7 @@ from app.routers import (
     matches,
     notifications,
     predictions,
+    qr,
     redistributions,
     surplus,
 )
@@ -57,6 +58,7 @@ for module in (
     matches,
     notifications,
     predictions,
+    qr,
     redistributions,
     surplus,
 ):

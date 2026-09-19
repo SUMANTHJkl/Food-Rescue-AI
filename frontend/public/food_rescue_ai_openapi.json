@@ -1048,6 +1048,144 @@
         }
       }
     },
+    "/api/v1/qr/generate/{batch_id}": {
+      "get": {
+        "tags": [
+          "qr-codes"
+        ],
+        "summary": "Generate Qr By Batch Id",
+        "description": "Generate Python QR code image and metadata for a specific surplus batch ID.",
+        "operationId": "generate_qr_by_batch_id_api_v1_qr_generate__batch_id__get",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "item_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "Surplus Dish",
+              "title": "Item Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qr/generate": {
+      "post": {
+        "tags": [
+          "qr-codes"
+        ],
+        "summary": "Generate Custom Qr",
+        "description": "Generate customized Python QR code payload and image.",
+        "operationId": "generate_custom_qr_api_v1_qr_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QRRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qr/verify": {
+      "post": {
+        "tags": [
+          "qr-codes"
+        ],
+        "summary": "Verify Qr Token",
+        "description": "Verify scanned Python QR code token.",
+        "operationId": "verify_qr_token_api_v1_qr_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QRVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/redistributions": {
       "get": {
         "tags": [
@@ -2400,6 +2538,85 @@
           "kitchen_id"
         ],
         "title": "PredictionRequest"
+      },
+      "QRRequest": {
+        "properties": {
+          "batch_id": {
+            "type": "integer",
+            "title": "Batch Id"
+          },
+          "item_name": {
+            "type": "string",
+            "title": "Item Name"
+          },
+          "donor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Donor Name",
+            "default": "Royal Palace Banquet"
+          },
+          "quantity_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity Kg",
+            "default": 25.0
+          },
+          "plates_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plates Count",
+            "default": 100
+          },
+          "safety_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Score",
+            "default": 95
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "item_name"
+        ],
+        "title": "QRRequest"
+      },
+      "QRVerifyRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "QRVerifyRequest"
       },
       "RedistributionCreate": {
         "properties": {
